@@ -7,7 +7,7 @@ my $start_page = 1;
 my $end_page = 17;
 
 #保存主页的URL
-open HOME,">data/home.txt";
+open DATA,">data/data.txt";
 
 foreach my $i($start_page..$end_page){
 	my $url = 'http://www.alibaba.com/corporations/logistics/--US/';
@@ -25,56 +25,50 @@ foreach my $i($start_page..$end_page){
 		#获取公司联系信息页内容
 		$content = get($curl);
 		#去掉所有换行和空白
-		$content =~s/[\r\n]*|\s*|<br>|<br\/>//mg;
-		#print $content;exit;
+		$content =~s/[\r\n]*|<br>|<br\s*\/>//mg;
+		
 		#公司名
-		@company= $content=~m/<th>CompanyName:<\/th><td>(.*?)<\/td>/g;
+		@company= $content=~m/<th>\s*Company Name:\s*<\/th>\s*<td>(.*?)<\/td>/g;
 		#$company = @company[0];
 		$content = encode_utf8($content);
-		syswrite(HOME,$content);
+		
 		#联系人
-		@contactor = $content=~m/<h5>(.*?)<\/h5>/g;
+		@contactor = $content=~m/<h5>\s*(.*?)\s*<\/h5>/g;
 		#$contactor = @contactor[0];
 		
 		#联系人职位
-		@position  =$content=~m/<\/h5><span>(.*?)<\/span>/g;
+		@position  =$content=~m/<\/h5>\s*<span>\s*(.*?)\s*<\/span>/g;
 		
 		#电话
-		@telephone =$content=~m/<dt>Telephone:<\/dt><dd>(.*?)<\/dd>/g;
+		@telephone =$content=~m/<dt>\s*Telephone:\s*<\/dt>\s*<dd>\s*(.*?)\s*<\/dd>/g;
+		
+		#传真
+		@fax       =$content=~m/<dt>\s*Fax:\s*<\/dt>\s*<dd>\s*(.*?)\s*<\/dd>/g;
 		
 		#地址
-		@address   =$content=~m/<dt>Address:<\/dt><dd>(.*?)<\/dd>/g;
+		@address   =$content=~m/<dt>\s*Address:\s*<\/dt>\s*<dd>\s*(.*?)\s*<\/dd>/g;
 		
 		#邮编
-		@zip       =$content=~m/<dt>Zip:<\/dt><dd>(.*?)<\/dd>/g;
+		@zip       =$content=~m/<dt>\s*Zip:\s*<\/dt>\s*<dd>\s*(.*?)\s*<\/dd>/g;
 		
 		#国家
-		@country   =$content=~m/<dt>Country\/Region:<\/dt><dd>(.*?)<\/dd>/g;
+		@country   =$content=~m/<dt>\s*Country\/Region:\s*<\/dt>\s*<dd>\s*(.*?)\s*<\/dd>/g;
 		
 		#省份/州
-		@state     =$content=~m/<dt>Province\/State:<\/dt><dd>(.*?)<\/dd>/g;
+		@state     =$content=~m/<dt>\s*Province\/State:\s*<\/dt>\s*<dd>\s*(.*?)\s*<\/dd>/g;
 		
 		#城市
-		@city      = $content=~m/<dt>City:<\/dt><dd>(.*?)<\/dd>/g;
+		@city      = $content=~m/<dt>\s*City:\s*<\/dt>\s*<dd>\s*(.*?)\s*<\/dd>/g;
 		
 		#公司网站
-		@site      = $content=~m/<th>Website:<\/th><td><ahref=\"(.*?)\"target=\'\_blank\'>.*?<\/a><\/td>/g;
+		@site      = $content=~m/<th>\s*Website:\s*<\/th>\s*<td>\s*<a.*?>(.*?)<\/a>\s*<\/td>/ig;
 		
 		#阿里巴巴主页
-		@alihome   =$content=~m/<th>Websiteonalibaba\.com:<\/th><td><ahref=\"(.*?)\"target=\'\_blank\'>.*?<\/td>/g;
+		@alihome   =$content=~m/<th>\s*Website on alibaba\.com:\s*<\/th>\s*<td>\s*<a href=\"(.*?)\"\s*target=\'\_blank\'\s*>\s*.*?\s*<\/td>/g;
 		
-		print 'company:'.@company[0]."\n";
-		print 'contactor:'.@contactor[0]."\n";
-		print 'position:'.@position[0]."\n";
-		print 'telephone:'.@telephone[0]."\n";
-		print 'address:'.@address[0]."\n";
-		print 'zip:'.@zip[0]."\n";
-		print 'country:'.@country[0]."\n";
-		print 'state:'.@state[0]."\n";
-		print 'city:'.@city[0]."\n";
-		print 'site:'.@site[0]."\n";
-		print 'alihome:'.@alihome[0]."\n";
-		close(HOME);
-		
+		$sql = "INSERT INTO `company`.`logistic` (`company`, `contactor`, `position`, `telephone`, `fax`, `address`, `zip`, `country`, `state`, `city`, `site`, `alihome`) 
+			VALUES ('@company[0]', '@contactor[0]', '@position[0]', '@telephone[0]', '@fax[0]', '@address[0]', '@zip[0]', '@country[0]', '@state[0]', '@city[0]', '@site[0]', '@alihome[0]');";
+		print $sql."\n";
+		syswrite(DATA,$sql);
 	}
 }
