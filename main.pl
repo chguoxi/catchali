@@ -1,5 +1,5 @@
+use Encode;
 use utf8; 
-use LWP::RobotUA;
 use LWP::Simple;
 
 my $start_page = 1;
@@ -25,12 +25,12 @@ foreach my $i($start_page..$end_page){
 		#获取公司联系信息页内容
 		$content = get($curl);
 		#去掉所有换行和空白
-		$content =~s/[\r\n]*|\s*//mg;
+		$content =~s/[\r\n]*|\s*|<br>|<br\/>//mg;
 		#print $content;exit;
 		#公司名
 		@company= $content=~m/<th>CompanyName:<\/th><td>(.*?)<\/td>/g;
 		#$company = @company[0];
-		
+		syswrite(HOME,$content);
 		#联系人
 		@contactor = $content=~m/<h5>(.*?)<\/h5>/g;
 		#$contactor = @contactor[0];
@@ -57,7 +57,7 @@ foreach my $i($start_page..$end_page){
 		@city      = $content=~m/<dt>City:<\/dt><dd>(.*?)<\/dd>/g;
 		
 		#公司网站
-		@site      = $content=~m/<th>Website:<\/th><td><atarget=\"\_blank\"href=\".*?\">(.*?)<\/a><\/td>/g;
+		@site      = $content=~m/<th>Website:<\/th><td><a.*>(.*?)<\/a><\/td>/g;
 		
 		#阿里巴巴主页
 		@alihome   =$content=~m/<th>Websiteonalibaba\.com:<\/th><td><ahref=\"(.*?)\"target=\'\_blank\'>.*?<\/td>/g;
@@ -73,6 +73,7 @@ foreach my $i($start_page..$end_page){
 		print 'city:'.@city[0]."\n";
 		print 'site:'.@site[0]."\n";
 		print 'alihome:'.@alihome[0]."\n";
-		
+		close(HOME);
+		exit;
 	}
 }
