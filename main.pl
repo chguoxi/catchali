@@ -1,4 +1,4 @@
-use Encode;
+﻿use Encode;
 use utf8; 
 use LWP::Simple;
 
@@ -12,7 +12,7 @@ open HOME,">data/home.txt";
 foreach my $i($start_page..$end_page){
 	my $url = 'http://www.alibaba.com/corporations/logistics/--US/';
 
-	$html = get($url.'1.html');
+	$html = get($url."$i.html");
 
 	my @id = $html =~m/http:\/\/www\.alibaba\.com\/company\/[\w]+\.html/g;
 
@@ -30,6 +30,7 @@ foreach my $i($start_page..$end_page){
 		#公司名
 		@company= $content=~m/<th>CompanyName:<\/th><td>(.*?)<\/td>/g;
 		#$company = @company[0];
+		$content = encode_utf8($content);
 		syswrite(HOME,$content);
 		#联系人
 		@contactor = $content=~m/<h5>(.*?)<\/h5>/g;
@@ -57,7 +58,7 @@ foreach my $i($start_page..$end_page){
 		@city      = $content=~m/<dt>City:<\/dt><dd>(.*?)<\/dd>/g;
 		
 		#公司网站
-		@site      = $content=~m/<th>Website:<\/th><td><a.*>(.*?)<\/a><\/td>/g;
+		@site      = $content=~m/<th>Website:<\/th><td><ahref=\"(.*?)\"target=\'\_blank\'>.*?<\/a><\/td>/g;
 		
 		#阿里巴巴主页
 		@alihome   =$content=~m/<th>Websiteonalibaba\.com:<\/th><td><ahref=\"(.*?)\"target=\'\_blank\'>.*?<\/td>/g;
@@ -74,6 +75,6 @@ foreach my $i($start_page..$end_page){
 		print 'site:'.@site[0]."\n";
 		print 'alihome:'.@alihome[0]."\n";
 		close(HOME);
-		exit;
+		
 	}
 }
